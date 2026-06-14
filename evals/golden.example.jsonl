@@ -1,0 +1,3 @@
+{"id": "sample-overfitting", "type": "answerable", "question": "que es overfitting y como lo reduzco", "expected_sources": ["Sample ML Note"], "key_facts": ["overfitting ocurre cuando el modelo memoriza el entrenamiento", "se reduce con regularizacion, mas datos o early stopping"]}
+{"id": "sample-embeddings", "type": "answerable", "question": "para que sirven los embeddings en un RAG", "expected_sources": ["Sample RAG Note"], "key_facts": ["convierten texto en vectores", "permiten buscar fragmentos semanticamente similares"]}
+{"id": "sample-out-of-scope", "type": "out_of_scope", "question": "cual es la capital de Mongolia", "expected_sources": [], "key_facts": []}

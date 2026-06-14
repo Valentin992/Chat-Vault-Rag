@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Secrets — NUNCA subir API keys
+.env
+
+# Artefactos generados
+chunks.jsonl
+chunks_embedded.jsonl
+chroma/
+*.sqlite3
+
+# Private eval data / generated eval results
+evals/golden.jsonl
+evals/results/*.json
+!evals/results/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db

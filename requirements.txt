@@ -1,0 +1,17 @@
+# Paso 1 (chunking) NO necesita nada: corre con Python estándar.
+
+# Paso 2 — embeddings (OpenAI) + carga de la API key:
+openai
+python-dotenv
+
+# Paso 3 — vector DB:
+chromadb
+
+# Paso 5 — generación con Claude:
+anthropic
+
+# Paso 6 — interfaz:
+streamlit
+
+# Paso 7a — evals (pydantic valida el veredicto del juez LLM):
+pydantic
