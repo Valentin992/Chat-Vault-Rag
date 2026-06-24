@@ -30,7 +30,7 @@ citando la nota fuente. Portfolio piece de Applied AI.
 | 6 | Interfaz (Streamlit) — `app.py` | ✅ |
 | 7a | **Evals** — golden dataset + juez LLM (`run_evals.py`) | ✅ |
 | 7b | Repo público en GitHub | ✅ |
-| 7c | Deploy con demo (corpus sanitizado o con auth) | ⬜ opcional |
+| 7c | **Deploy** — demo pública en Streamlit Cloud | ✅ |
 
 ## Paso 1 — Chunking
 
@@ -215,3 +215,60 @@ para evitar publicar datos del corpus o resultados generados.
   fijar criterios más atómicos.
 - **Preguntas trampa incluidas:** un RAG que no sabe decir "no sé" no está listo.
   Las 4 out-of-scope son tan importantes como las 11 respondibles.
+
+## Paso 7c — Deploy (Streamlit Cloud)
+
+La demo pública usa un corpus sintético de 12 notas de ML/AI (en `demo_vault/`)
+que vive en el repo — sin datos privados. El índice vectorial se construye
+automáticamente al arrancar la app por primera vez (~30 s, ~$0.002 en embeddings).
+
+### Cómo hacer tu propio deploy
+
+1. **Fork** este repo en GitHub.
+
+2. **Crea una cuenta** en [share.streamlit.io](https://share.streamlit.io) (gratis).
+
+3. **Nueva app** → conecta tu fork → Main file: `app.py`.
+
+4. **Settings → Secrets** — pega tus claves:
+
+```toml
+OPENAI_API_KEY = "sk-..."
+ANTHROPIC_API_KEY = "sk-ant-..."
+```
+
+5. **Deploy.** En el primer arranque verás el spinner de construcción del índice.
+   Desde el segundo arranque el índice ya está en disco y la app arranca instantáneo.
+
+### Para usar tu propio vault (privado)
+
+Si quieres desplegar con tus propias notas en lugar del corpus sintético:
+
+1. Corre el pipeline completo localmente:
+   ```bash
+   python chunk_vault.py /ruta/a/tu/vault
+   python embed_chunks.py
+   python build_index.py
+   ```
+2. Sube el directorio `chroma/` a un bucket (S3, GCS) y descargálo al arrancar,
+   o usa una vector DB gestionada en la nube (Pinecone, Qdrant Cloud) en lugar de
+   ChromaDB local. Ambas opciones requieren modificar `search.py`.
+
+Alternativa más simple: añade autenticación con
+[`streamlit-authenticator`](https://github.com/mkhorasani/Streamlit-Authenticator)
+y despliega con el corpus real (ya que el acceso está protegido).
+
+### Arquitectura de la demo
+
+```
+demo_vault/*.md          ← corpus público sintético (12 notas)
+  ↓ demo_setup.py         chunk + embed (OpenAI) + load (ChromaDB)
+chroma/                  ← índice vectorial persistente en disco
+  ↓ search.py             retrieval top-k
+  ↓ ask.py                Claude genera con citas
+  ↓ app.py                Streamlit UI
+```
+
+Cuando el contenedor de Streamlit Cloud reinicia (tras inactividad), `chroma/`
+se pierde y `demo_setup.py` reconstruye el índice automáticamente al siguiente
+acceso. Costo: ~$0.002 por reconstrucción (1 llamada a OpenAI Embeddings).
