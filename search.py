@@ -32,10 +32,7 @@ except Exception:
 
 load_dotenv(Path(__file__).parent / ".env")  # .env junto a este archivo, no al cwd
 
-EMBED_MODEL = "text-embedding-3-small"   # debe coincidir con el Paso 2
-CHROMA_DIR = Path(__file__).parent / "chroma"
-COLLECTION = "vault"
-TOP_K = 5
+from config import EMBED_MODEL, CHROMA_DIR, COLLECTION, TOP_K
 
 
 def search(question: str, k: int = TOP_K) -> list[dict]:

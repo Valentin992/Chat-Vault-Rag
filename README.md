@@ -1,22 +1,68 @@
-# Chat con mi Vault (RAG)
+# 💬 VaultChat — chat with your own notes
 
-> **EN summary:** A RAG system that answers questions about a local Obsidian
-> vault (ML/AI study notes), citing the source note — with an **evals layer**
-> (hand-written golden dataset + LLM-as-judge with structured outputs) measuring
-> retrieval recall, groundedness, fact coverage, and hallucination resistance.
-> Python · ChromaDB · OpenAI embeddings · Claude (Opus 4.8) · Streamlit.
-> **Measured:** 100% recall@8 · 100% groundedness · 97% fact coverage · 100%
-> abstention on out-of-scope questions · ~$0.019/query. The evals caught a real
-> bug the surface metrics hid: *source-level* recall was 100% while fact-bearing
-> chunks ranked 6-7 — fixed and verified by re-measurement (86% → 97%).
-> Full design decisions documented below (in Spanish).
+**Point it at your Obsidian vault and ask it anything.** Answers come back grounded
+in *your* notes — with a link to the exact note and section. It runs on your machine,
+with your own API keys. If the answer isn't in your notes, it says so instead of
+making something up.
 
-Un sistema RAG que responde preguntas sobre un vault local de Obsidian (notas de ML/AI),
-citando la nota fuente. Portfolio piece de Applied AI.
+> Local-first · open source · cites every source · measured to not hallucinate.
 
-> Nota de diseño del repo: el **código vive aquí**, separado del vault de Obsidian.
-> El vault es el *corpus de datos*; este repo es el *código*. Así Obsidian no indexa
-> archivos de Python y el repo queda limpio para GitHub.
+**Measured on the author's vault** (open evals harness, 15 golden questions, LLM-judged):
+
+| recall@8 | groundedness | fact coverage | out-of-scope abstention | cost/query |
+|:---:|:---:|:---:|:---:|:---:|
+| **100%** | **100%** | **97%** | **100%** | **~$0.02** |
+
+Stack: Python · ChromaDB · OpenAI embeddings · Claude · Streamlit.
+
+---
+
+## Quickstart — your vault in ~5 minutes
+
+```bash
+# 1. clone & install
+git clone https://github.com/Valentin992/Chat-Vault-Rag.git
+cd Chat-Vault-Rag
+python -m venv .venv
+.venv\Scripts\Activate.ps1          # Windows PowerShell  (mac/Linux: source .venv/bin/activate)
+pip install -r requirements.txt
+
+# 2. configure — copy the template and fill in your vault path + API keys
+copy .env.example .env              # mac/Linux: cp .env.example .env
+#   VAULT_PATH=C:/path/to/your/vault
+#   OPENAI_API_KEY=sk-...           (embeddings)   https://platform.openai.com/api-keys
+#   ANTHROPIC_API_KEY=sk-ant-...    (answers)      https://console.anthropic.com/settings/keys
+
+# 3. build the index (chunk → embed → store). Indexing a vault costs a few cents.
+python chunk_vault.py
+python embed_chunks.py
+python build_index.py
+
+# 4. chat
+streamlit run app.py                # or one-shot from the CLI:  python ask.py "your question"
+```
+
+That's it. All settings (vault path, folders to skip, models, retrieval depth) live
+in **`config.py`** and can be overridden from `.env` — you never edit the same value
+in three files. Your notes and keys never leave your machine: the only external calls
+are to the embedding/LLM providers *you* configure.
+
+> **Repo design note:** the **code lives here**, separate from your vault. Your vault
+> is the *data*; this repo is the *code*. Keeping them apart means Obsidian doesn't
+> index Python files and the repo stays clean.
+
+---
+
+## How it works
+
+`question → embedding (OpenAI) → Chroma similarity search → top-k of YOUR chunks →
+Claude → answer with [n] citations`. Each retrieved chunk carries its source note and
+heading, so every claim is traceable back to where it came from.
+
+---
+
+> The sections below document the design decisions behind each step (parts in
+> Spanish — kept as the original build log / portfolio notes).
 
 ## Pipeline
 

@@ -39,11 +39,8 @@ except Exception:
 # se lance desde otro directorio (ej. el preview de Streamlit).
 load_dotenv(Path(__file__).parent / ".env")
 
-MODEL = "claude-opus-4-8"
-TOP_K = 8            # cuántos chunks le damos a Claude como contexto
-                     # (5 → 8 el 2026-06-09: los evals mostraron que los hechos a veces
-                     #  viven en el chunk rank 6-7 de la nota correcta — ver evals/results)
-MAX_TOKENS = 16000   # tope de salida, no objetivo — las respuestas serán mucho más cortas
+from config import GEN_MODEL as MODEL, TOP_K  # generation model + context size (override via .env)
+MAX_TOKENS = 16000   # output cap, not a target — answers are typically far shorter
 
 # Precio de claude-opus-4-8 por millón de tokens (para mostrar costo por pregunta)
 PRICE_IN_PER_MTOK = 5.00
@@ -51,16 +48,17 @@ PRICE_OUT_PER_MTOK = 25.00
 
 # El system prompt es FIJO (no interpolar nada dinámico): así Claude puede
 # cachearlo como prefijo cuando haya conversación multi-turno en el Paso 6.
-SYSTEM = """Eres el asistente de un vault local de Obsidian con notas de ML/AI.
-Respondes preguntas usando SOLO el contexto proporcionado: fragmentos de notas.
+SYSTEM = """You are an assistant for the user's personal notes — an Obsidian-style \
+Markdown vault. You answer questions using ONLY the provided context: excerpts \
+retrieved from their notes.
 
-Reglas:
-- Cita la fuente de cada afirmación con [n], donde n es el número del fragmento.
-- Si el contexto no contiene la respuesta, dilo claramente. No inventes nada.
-- Responde en el idioma de la pregunta.
-- Sé directo, sin relleno — pero completo: cubre todos los puntos relevantes
-  que el contexto ofrezca para la pregunta (qué es, cómo funciona, cuándo aplica).
-  No nombres un concepto clave sin explicarlo si el contexto trae la explicación."""
+Rules:
+- Cite the source of every claim with [n], where n is the number of the excerpt.
+- If the context does not contain the answer, say so plainly. Never make anything up.
+- Answer in the same language as the question.
+- Be direct, no filler — but complete: cover every relevant point the context offers
+  (what it is, how it works, when it applies). Don't name a key concept without
+  explaining it if the context provides the explanation."""
 
 
 def build_context(hits: list[dict]) -> str:

@@ -31,13 +31,12 @@ except Exception:
 load_dotenv()
 
 
-# ─── CONFIG ───
-EMBED_MODEL = "text-embedding-3-small"   # mismo modelo del Paso 2 (¡debe coincidir!)
-INPUT_FILE = Path(__file__).parent / "chunks_embedded.jsonl"
-CHROMA_DIR = Path(__file__).parent / "chroma"
-COLLECTION = "vault"
+# ─── CONFIG (centralized in config.py) ───
+from config import EMBED_MODEL, EMBEDDED_FILE as INPUT_FILE, CHROMA_DIR, COLLECTION
 ADD_BATCH = 500
-DEMO_QUERY = "¿qué es el descenso de gradiente?"
+# Optional post-index sanity check. Set DEMO_QUERY in .env to run one of your
+# own questions after indexing; left empty, we just report the vector count.
+DEMO_QUERY = os.getenv("DEMO_QUERY", "").strip()
 
 
 def load_embedded() -> list[dict]:
@@ -80,13 +79,18 @@ def main():
 
     print(f"  colección '{COLLECTION}' = {collection.count()} vectores. Persistida en ./chroma/")
 
-    # ── Demo del Paso 4: una búsqueda real por significado ──
+    # ── Optional demo: a real semantic search (set DEMO_QUERY in .env) ──
+    if not DEMO_QUERY:
+        print("-" * 60)
+        print("  Index ready. Try it:  python search.py \"your question\"")
+        print("  (set DEMO_QUERY in .env to auto-run a search here.)")
+        return
     if not os.getenv("OPENAI_API_KEY"):
-        print("(sin OPENAI_API_KEY → me salto la búsqueda de demo, pero el índice ya está)")
+        print("(no OPENAI_API_KEY → skipping demo search, but the index is built)")
         return
 
     print("-" * 60)
-    print(f"DEMO de búsqueda — pregunta: {DEMO_QUERY!r}")
+    print(f"DEMO search — question: {DEMO_QUERY!r}")
     oai = OpenAI()
     qvec = oai.embeddings.create(model=EMBED_MODEL, input=[DEMO_QUERY]).data[0].embedding
     res = collection.query(query_embeddings=[qvec], n_results=3)

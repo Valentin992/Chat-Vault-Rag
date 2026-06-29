@@ -40,13 +40,10 @@ load_dotenv()  # carga las variables de .env (la API key)
 #  CONFIG
 # ─────────────────────────────────────────────────────────────────────────
 
-# Modelo de embeddings. text-embedding-3-small: 1536 dimensiones, ~$0.02 / 1M
-# tokens. Para tu vault (~90K tokens) el costo total es de centavos.
-# Alternativa de más calidad: "text-embedding-3-large" (3072 dims, ~6x el costo).
-MODEL = "text-embedding-3-small"
-
-INPUT_FILE = Path(__file__).parent / "chunks.jsonl"
-OUTPUT_FILE = Path(__file__).parent / "chunks_embedded.jsonl"
+# Embeddings model + file paths come from config.py (override via .env).
+# Default: text-embedding-3-small (1536 dims, ~$0.02 / 1M tokens — cents for a
+# whole vault). Higher quality: set EMBED_MODEL=text-embedding-3-large in .env.
+from config import EMBED_MODEL as MODEL, CHUNKS_FILE as INPUT_FILE, EMBEDDED_FILE as OUTPUT_FILE
 
 # Cuántos chunks mandar por llamada a la API. La API acepta listas; agrupar
 # reduce el número de requests (~1053 chunks / 100 ≈ 11 llamadas).

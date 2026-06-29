@@ -40,42 +40,21 @@ if load_dotenv:
 
 
 # ─────────────────────────────────────────────────────────────────────────
-#  CONFIG — esto es lo que experimentas en el Paso 1
+#  CONFIG — todo se centraliza en config.py (tunéable por env / .env)
 # ─────────────────────────────────────────────────────────────────────────
-
-DEFAULT_VAULT_PATH = "C:/path/to/your/vault"
-VAULT_PATH = Path(os.getenv("VAULT_PATH", DEFAULT_VAULT_PATH))
-
-# Carpetas que NO son notas de conocimiento → se omiten del corpus.
-#  - .obsidian / .trash : config y papelera de Obsidian
-#  - copilot            : prompts de plugin y logs de chat (ruido)
-#  - 05 - Templates     : plantillas con sintaxis {{title}} (ruido)
-SKIP_DIRS = {".obsidian", ".trash", "copilot", "05 - Templates"}
-
-# Tamaño objetivo de cada chunk, en caracteres. ~1000 chars ≈ ~250 tokens.
-# POR QUÉ este tamaño:
-#   - Pequeño → cada chunk es un pasaje enfocado → mejores embeddings y
-#     citas precisas a la nota fuente.
-#   - Grande  → cada chunk se sostiene solo (lleva su propio contexto).
-#   Tus notas de concepto son atómicas: muchas entran en 1-2 chunks.
-TARGET_CHARS = 1000
-
-# Tope duro: si una sección pasa de esto, se parte aunque quede a la mitad.
-MAX_CHARS = 1500
-
-# Solapamiento entre chunks consecutivos (en caracteres). Arrastra un poco
-# de contexto de un chunk al siguiente para no cortar una idea en la frontera.
-# (Es la misma idea de "chunk overlap" que verás en el curso de DeepLearning.AI.)
-OVERLAP_CHARS = 150
-
-# Tamaño mínimo: los chunks más chicos que esto se descartan como ruido.
-# Decisión (2026-06-09): a <50 chars TODO eran divisores (`---`), links sueltos
-# (`[[Naive Bayes]]`), navegación y boilerplate de plantilla — nada útil para
-# recuperar. ~12 tokens. Subir este número descarta más; bajarlo conserva ruido.
-MIN_CHARS = 50
-
-# Archivo de salida que consumirá el Paso 2 (embeddings).
-OUTPUT_FILE = Path(__file__).parent / "chunks.jsonl"
+#  - VAULT_PATH / SKIP_DIRS: qué carpeta indexar y qué omitir.
+#  - TARGET/MAX/OVERLAP/MIN_CHARS: parámetros de chunking para experimentar.
+#  Cámbialos en config.py o vía variables de entorno; no edites valores aquí.
+from config import (
+    DEFAULT_VAULT_PATH,
+    VAULT_PATH,
+    SKIP_DIRS,
+    TARGET_CHARS,
+    MAX_CHARS,
+    OVERLAP_CHARS,
+    MIN_CHARS,
+    CHUNKS_FILE as OUTPUT_FILE,
+)
 
 
 # ─────────────────────────────────────────────────────────────────────────
