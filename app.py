@@ -15,6 +15,17 @@ Public demo on Streamlit Cloud:
     ~$0.002 in embeddings) so visitors can try it with zero setup.
 """
 
+# ── ChromaDB sqlite shim (Streamlit Cloud / Linux) ──────────────────────
+# ChromaDB needs sqlite3 >= 3.35; some hosted Linux images ship an older one.
+# pysqlite3-binary (installed only on Linux — see requirements.txt) provides a
+# modern build; swap it in BEFORE anything imports chromadb. No-op locally.
+try:
+    __import__("pysqlite3")
+    import sys
+    sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+except ImportError:
+    pass
+
 import os
 
 # Load API keys from Streamlit secrets (Streamlit Cloud) into os.environ BEFORE

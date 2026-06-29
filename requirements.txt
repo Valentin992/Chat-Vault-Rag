@@ -15,3 +15,8 @@ streamlit
 
 # Paso 7a — evals (pydantic valida el veredicto del juez LLM):
 pydantic
+
+# Deploy (Streamlit Cloud / Linux): ChromaDB needs sqlite3 >= 3.35, but the
+# hosted Linux image ships an older one. This wheel provides a modern build.
+# Installed ONLY on Linux — never on local Windows/Mac (no wheel there anyway).
+pysqlite3-binary; sys_platform == "linux"
