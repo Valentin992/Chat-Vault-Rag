@@ -7,6 +7,8 @@ making something up.
 
 > Local-first · open source · cites every source · measured to not hallucinate.
 
+**[▶ Try the live demo](https://chat-vault-demo.streamlit.app/)** (no setup) · **[📬 Join the waitlist](https://valentin992.github.io/Chat-Vault-Rag/)** for a hosted version
+
 **Measured on the author's vault** (open evals harness, 15 golden questions, LLM-judged):
 
 | recall@8 | groundedness | fact coverage | out-of-scope abstention | cost/query |

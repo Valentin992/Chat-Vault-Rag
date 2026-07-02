@@ -69,6 +69,12 @@ if DEMO_MODE:
         "> **Public demo:** a synthetic corpus of 12 ML/AI notes. The author's real "
         "(private) vault has 100+ study notes with measured eval metrics."
     )
+    st.info(
+        "**Want this on your own vault?** "
+        "[Run it yourself, free & open source](https://github.com/Valentin992/Chat-Vault-Rag) · "
+        "[Join the waitlist for a hosted version](https://valentin992.github.io/Chat-Vault-Rag/)",
+        icon="💡",
+    )
 else:
     st.caption(
         "Chat with your own notes — every answer cites the source note [n], "
@@ -105,6 +111,11 @@ with st.sidebar:
             "- Loss Functions, Neural Networks\n"
             "- Cross-Validation, Vector DBs\n"
             "- Prompt Engineering"
+        )
+        st.divider()
+        st.markdown(
+            "🧠 [Run this on your own vault](https://github.com/Valentin992/Chat-Vault-Rag)\n\n"
+            "📬 [Join the waitlist](https://valentin992.github.io/Chat-Vault-Rag/)"
         )
 
 
